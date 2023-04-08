@@ -1,5 +1,4 @@
 ﻿using System.Dynamic;
-
 class BankAccount
 {
     public int AccountNumber { get; set; }
@@ -8,6 +7,8 @@ class BankAccount
 
 class Bank
 {
+    
+    int remainingAttempts = 5;
     private List<BankAccount> accounts = new();
 
     public void CreateAccount()
@@ -33,31 +34,7 @@ class Bank
 
     public void Deposit()
     {
-        Console.WriteLine("Enter your account's number...");
-        int remainingAttempts = 5; 
-        BankAccount account = null;
-
-        while (remainingAttempts > 0)
-        {
-            int userInput = Convert.ToInt32(Console.ReadLine());
-
-            account = accounts.FirstOrDefault(a => a.AccountNumber == userInput);
-
-            if (account == null)
-            {
-                Console.WriteLine("Wrong number... Please try again.");
-                remainingAttempts--;
-                if (remainingAttempts == 0)
-                {
-                    Console.WriteLine("You failed to enter account number.\nExiting Program...\n");
-                    return;
-                }
-            }
-            else
-            {
-                break;
-            }
-        }
+        CheckBankAccount(out var account);
 
         Console.WriteLine("How much money do you want to deposit?");
         decimal userDepositMoney = Convert.ToDecimal(Console.ReadLine());
@@ -67,39 +44,17 @@ class Bank
 
     public void Withdraw()
     {
-        Console.WriteLine("Enter your account's number...");
-        int remainingAttempts = 5;
-        BankAccount account = null;
+        CheckBankAccount(out var account);
 
-        while (remainingAttempts > 0)
-        {
-            int userInput = Convert.ToInt32(Console.ReadLine());
-
-            account = accounts.FirstOrDefault(a => a.AccountNumber == userInput);
-
-            if (account == null)
-            {
-                Console.WriteLine("Wrong number... Please try again.");
-                remainingAttempts--;
-                if (remainingAttempts == 0)
-                {
-                    Console.WriteLine("You failed to enter account number.\nExiting Program...\n");
-                    Environment.Exit(12345);
-                }
-            }
-            else
-            {
-                break;
-            }
-        }
         Console.WriteLine("How much money do you want to withdraw?");
-            
+
         while (true)
         {
             decimal userWithdrawMoney = Convert.ToDecimal(Console.ReadLine());
             if (userWithdrawMoney > account.Balance)
             {
-                Console.WriteLine($"You entered a value that is higher than balance.\nYour balance is: {account.Balance}\nPlease enter a lower value.\n");
+                Console.WriteLine(
+                    $"You entered a value that is higher than balance.\nYour balance is: {account.Balance}\nPlease enter a lower value.\n");
             }
             else
             {
@@ -110,11 +65,10 @@ class Bank
         }
     }
 
-    public void CheckBalance()
+    public void CheckBankAccount(out BankAccount? account)
     {
         Console.WriteLine("Enter your account's number...");
-        int remainingAttempts = 5;
-        BankAccount account = null;
+        account = null;
 
         while (remainingAttempts > 0)
         {
@@ -137,9 +91,15 @@ class Bank
                 break;
             }
         }
+    }
+
+    public void CheckBalance()
+    {
+        CheckBankAccount(out var account);
+
         Console.WriteLine($"Your balance is: {account.Balance}\n");
     }
-}
+};
 
 class Program
 {
