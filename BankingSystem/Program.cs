@@ -7,8 +7,7 @@ class BankAccount
 
 class Bank
 {
-    
-    int remainingAttempts = 5;
+    int remainingAttempts;
     private List<BankAccount> accounts = new();
 
     public void CreateAccount()
@@ -64,9 +63,17 @@ class Bank
             }
         }
     }
+    
+    public void CheckBalance()
+    {
+        CheckBankAccount(out var account);
+
+        Console.WriteLine($"Your balance is: {account.Balance}\n");
+    }
 
     public void CheckBankAccount(out BankAccount? account)
     {
+        remainingAttempts = 5;
         Console.WriteLine("Enter your account's number...");
         account = null;
 
@@ -91,13 +98,6 @@ class Bank
                 break;
             }
         }
-    }
-
-    public void CheckBalance()
-    {
-        CheckBankAccount(out var account);
-
-        Console.WriteLine($"Your balance is: {account.Balance}\n");
     }
 };
 
