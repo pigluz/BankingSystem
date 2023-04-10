@@ -9,7 +9,7 @@ class Program
         Console.WriteLine("Welcome to Test Bank!");
         while (true)
         {
-            Console.WriteLine("Menu:\n1.Create Account\n2.Deposit\n3.Withdraw\n4.Check Balance\n5.Exit");
+            Console.WriteLine("Menu:\n1.Create Account\n2.Deposit\n3.Withdraw\n4.Check Balance\n5.Exit\n");
             int userMenuInput = Convert.ToInt32(Console.ReadLine());
 
             switch (userMenuInput)
@@ -31,10 +31,13 @@ class Program
                     break;
                 
                 case 5:
-                    return;
-                
+                    Console.WriteLine("\nExiting Program");
+                    Environment.Exit(0);
+                    break;
+
                 default:
-                    Console.WriteLine("Wrong value.\nExiting Program");
+                    Console.WriteLine("\nWrong value.\nExiting Program");
+                    Environment.Exit(0);
                     break;
             }
         }
