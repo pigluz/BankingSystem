@@ -69,6 +69,8 @@ class Bank
         CheckBankAccount(out var account);
 
         Console.WriteLine($"Your balance is: {account.Balance}\n");
+        
+        
     }
 
   
