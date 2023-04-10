@@ -1,18 +1,23 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Data.SqlClient;
+using System.Runtime.CompilerServices;
 
 namespace BankingSystem;
 
 class Bank
 {
-    int remainingAttempts;
-    private List<BankAccount> accounts = new();
-
+    int _remainingAttempts;
+    private List<BankAccount> _accounts = new();
+    
     public void CreateAccount()
     {
         bool validNumber = false;
         
         while (validNumber == false)
         {
+            //
+            // NO WORKEYYYYYYYYYYYYYYYYYYYYYYYYY....................
+            //
+            
             Console.WriteLine("Enter a new account number... (2-6 characters long)");
             try
             {
@@ -21,21 +26,29 @@ class Bank
                 // If user enters int correctly...
                 if (!(accountNumber < 10 || accountNumber > 100000))
                 {
+                    var queryIfAccountExisit =
+                        $"SELECT CASE WHEN EXISTS (SELECT * FROM finanse.bankSystem WHERE accountNumber = '{accountNumber}') THEN CAST (1 AS BIT) ELSE CAST (0 AS BIT) END;";
+                    SqlCommand command = new SqlCommand(queryIfAccountExisit, Program.connection);
+                    int ifAccountExisitResult = (int)command.ExecuteScalar();
+
                     // Check if an account with this number already exists...
-                    if (accounts.Any(a => a.AccountNumber == accountNumber))
+                    if (ifAccountExisitResult == 1)
                     {
                         Console.WriteLine("An account with this number already exists. Please try again.\n");
-                        break;
                     }
-
+                    
                     // If no existing account was found, create a new account...
-                    BankAccount account = new BankAccount();
-                    account.AccountNumber = accountNumber;
-                    account.Balance = 0;
-                    accounts.Add(account);
+                    else
+                    {
+                        BankAccount account = new BankAccount();
+                        account.AccountNumber = accountNumber;
+                        account.Balance = 0;
+                        _accounts.Add(account);
 
-                    Console.WriteLine($"Success! Your account with a number {account.AccountNumber} has been created.\n");
-                    validNumber = true;
+                        Console.WriteLine($"Success! Your account with a number {account.AccountNumber} has been created.\n");
+                        validNumber = true;
+                    }
+                    
                 }
                 
                 // If user enters an int that is shorter than 2 or longer than 6 characters...
@@ -137,30 +150,30 @@ class Bank
 
     public void CheckBankAccount(out BankAccount? account)
     {
-        remainingAttempts = 5;
+        _remainingAttempts = 5;
         account = null;
         bool validateBankAccount = false;
 
         while (validateBankAccount == false)
         {
-            while (remainingAttempts > 0)
+            while (_remainingAttempts > 0)
             {
                 try
                 {
                     Console.WriteLine("Enter your account's number...");
                     int userInput = Convert.ToInt32(Console.ReadLine());
 
-                    account = accounts.FirstOrDefault(a => a.AccountNumber == userInput);
+                    account = _accounts.FirstOrDefault(a => a.AccountNumber == userInput);
 
                     
                     // If there is no matching bank account's number...
                     if (account == null)
                     {
                         Console.WriteLine("Wrong number... Please try again.\n");
-                        remainingAttempts--;
+                        _remainingAttempts--;
                         
                         // If user fails to enter valid accont number...
-                        if (remainingAttempts == 0)
+                        if (_remainingAttempts == 0)
                         {
                             Console.WriteLine("You failed to enter account number.\nExiting Program...\n");
                             Environment.Exit(0);
@@ -184,10 +197,10 @@ class Bank
                 {
                     Console.WriteLine("You entered invalid type of value. Try again...\n");
                     validateBankAccount = false;
-                    remainingAttempts--;
+                    _remainingAttempts--;
                     
                     // If user fails to enter valid account number../
-                    if (remainingAttempts == 0)
+                    if (_remainingAttempts == 0)
                     {
                         Console.WriteLine("You failed to enter account number.\nExiting Program...\n");
                         Environment.Exit(0);
