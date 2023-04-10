@@ -1,8 +1,5 @@
 ﻿namespace BankingSystem;
 
-
-
-
 class Program
 {
     static void Main(string[] args)
@@ -28,11 +25,14 @@ class Program
                 case 3:
                     bank.Withdraw();
                     break;
+                
                 case 4:
                     bank.CheckBalance();
                     break;
+                
                 case 5:
                     return;
+                
                 default:
                     Console.WriteLine("Wrong value.\nExiting Program");
                     break;
