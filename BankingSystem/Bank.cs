@@ -19,22 +19,19 @@ class Bank
             Console.WriteLine("Enter a new account number... (2-6 characters long)");
             try
             {
-                
-                // User enters a value...
-                int accountNumber = Convert.ToInt32(Console.ReadLine());
-
-                // If user enters int correctly...
-                if (!(accountNumber < 10 || accountNumber > 100000))
+                using (var connection = new SqlConnection(connectionString))
                 {
-                    Console.WriteLine("Łączenie z bazą danych...");
-                    using (var connection = new SqlConnection(connectionString))
+                    connection.Open();
+                    // User enters a value...
+                    int accountNumber = Convert.ToInt32(Console.ReadLine());
+
+                    // If user enters int correctly...
+                    if (!(accountNumber < 10 || accountNumber > 100000))
                     {
-                        connection.Open();
-                        Console.WriteLine("Połączono.\n");
                         var queryIfAccountExisit =
                             $"SELECT CASE WHEN EXISTS (SELECT * FROM finanse.bankSystem WHERE accountNumber = '{accountNumber}') THEN CAST (1 AS BIT) ELSE CAST (0 AS BIT) END;";
                         var command = new SqlCommand(queryIfAccountExisit, connection);
-                            
+
                         bool ifAccountExisitResult = (bool)command.ExecuteScalar();
 
 
@@ -54,20 +51,22 @@ class Bank
                             command = new SqlCommand(queryAccountAdd, connection);
                             command.ExecuteNonQuery();
 
-                            Console.WriteLine($"Success! Your account with a number {account.AccountNumber} has been created.\n");
+                            Console.WriteLine(
+                                $"Success! Your account with a number {account.AccountNumber} has been created.\n");
                             validNumber = true;
                         }
                     }
-                }
-                // If user enters an int that is shorter than 2 or longer than 6 characters...
-                else
-                {
-                    Console.WriteLine("You entered too short or too long number. Please try again\n");
-                    validNumber = false;
+                    // If user enters an int that is shorter than 2 or longer than 6 characters...
+                    else
+                    {
+                        Console.WriteLine("You entered too short or too long number. Please try again\n");
+                        validNumber = false;
+                    }
+                    connection.Close();
                 }
             }
 
-            // If user enters value other than int...
+            // Error message
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);

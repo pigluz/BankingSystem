@@ -12,42 +12,48 @@ public class Program
 
         while (!exit)
         {
-            Console.WriteLine("Welcome to Test Bank!");
-            while (true)
+            Console.WriteLine("Łączenie z bazą danych...");
+            using (var connection = new SqlConnection(Bank.connectionString))
             {
-                Console.WriteLine("Menu:\n1.Create Account\n2.Deposit\n3.Withdraw\n4.Check Balance\n5.Exit\n");
-                var userMenuInput = Convert.ToInt32(Console.ReadLine());
+                connection.Open();
+                Console.WriteLine("Połączono.\n");
 
-                switch (userMenuInput)
+                Console.WriteLine("Welcome to Test Bank!");
+                while (true)
                 {
-                    case 1:
-                        bank.CreateAccount();
-                        break;
+                    Console.WriteLine("Menu:\n1.Create Account\n2.Deposit\n3.Withdraw\n4.Check Balance\n5.Exit\n");
+                    var userMenuInput = Convert.ToInt32(Console.ReadLine());
 
-                    case 2:
-                        bank.Deposit();
-                        break;
+                    switch (userMenuInput)
+                    {
+                        case 1:
+                            bank.CreateAccount();
+                            break;
 
-                    case 3:
-                        bank.Withdraw();
-                        break;
+                        case 2:
+                            bank.Deposit();
+                            break;
 
-                    case 4:
-                        bank.CheckBalance();
-                        break;
+                        case 3:
+                            bank.Withdraw();
+                            break;
 
-                    case 5:
-                        Console.WriteLine("\nExiting Program");
-                        Environment.Exit(0);
-                        break;
+                        case 4:
+                            bank.CheckBalance();
+                            break;
 
-                    default:
-                        Console.WriteLine("\nWrong value.\nExiting Program");
-                        Environment.Exit(0);
-                        break;
+                        case 5:
+                            Console.WriteLine("\nExiting Program");
+                            Environment.Exit(0);
+                            break;
+
+                        default:
+                            Console.WriteLine("\nWrong value.\nExiting Program");
+                            Environment.Exit(0);
+                            break;
+                    }
                 }
             }
         }
-
     }
 }
