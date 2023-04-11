@@ -4,8 +4,6 @@ namespace BankingSystem;
 
 public class Program
 {
-    // Serwer o nazwie "BankDB" ; Baza danych o nazwie "Bank" 
-
 
     private static void Main(string[] args)
     {
@@ -40,13 +38,11 @@ public class Program
 
                     case 5:
                         Console.WriteLine("\nExiting Program");
-                        
                         Environment.Exit(0);
                         break;
 
                     default:
                         Console.WriteLine("\nWrong value.\nExiting Program");
-                       
                         Environment.Exit(0);
                         break;
                 }

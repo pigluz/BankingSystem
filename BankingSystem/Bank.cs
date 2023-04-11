@@ -6,10 +6,8 @@ namespace BankingSystem;
 class Bank
 {
     int _remainingAttempts;
-    private List<BankAccount> _accounts = new();
 
     public static string connectionString = @"Server=(localdb)\BankBD;DataBase=Bank";
-    public static SqlConnection connection = new SqlConnection(connectionString);
 
     public void CreateAccount()
     {
@@ -17,13 +15,12 @@ class Bank
 
         while (validNumber == false)
         {
-            //
-            // NO WORKEYYYYYYYYYYYYYYYYYYYYYYYYY....................
-            //
 
             Console.WriteLine("Enter a new account number... (2-6 characters long)");
             try
             {
+                
+                // User enters a value...
                 int accountNumber = Convert.ToInt32(Console.ReadLine());
 
                 // If user enters int correctly...
@@ -35,28 +32,32 @@ class Bank
                         connection.Open();
                         Console.WriteLine("Połączono.\n");
                         var queryIfAccountExisit =
-                        $"SELECT CASE WHEN EXISTS (SELECT * FROM finanse.bankSystem WHERE accountNumber = '{accountNumber}') THEN CAST (1 AS BIT) ELSE CAST (0 AS BIT) END;";
-                        SqlCommand command = new SqlCommand(queryIfAccountExisit, connection);
-                        int ifAccountExisitResult = (int)command.ExecuteScalar();
+                            $"SELECT CASE WHEN EXISTS (SELECT * FROM finanse.bankSystem WHERE accountNumber = '{accountNumber}') THEN CAST (1 AS BIT) ELSE CAST (0 AS BIT) END;";
+                        var command = new SqlCommand(queryIfAccountExisit, connection);
+                            
+                        bool ifAccountExisitResult = (bool)command.ExecuteScalar();
 
 
                         // Check if an account with this number already exists...
-                        if (ifAccountExisitResult == 1)
+                        if (ifAccountExisitResult)
                         {
                             Console.WriteLine("An account with this number already exists. Please try again.\n");
                         }
+                        // If no existing account was found, create a new account...
                         else
                         {
                             BankAccount account = new BankAccount();
                             account.AccountNumber = accountNumber;
-                            account.Balance = 0;
-                            _accounts.Add(account);
+
+                            var queryAccountAdd =
+                                $"INSERT INTO finanse.bankSystem (accountNumber) VALUES ({account.AccountNumber})";
+                            command = new SqlCommand(queryAccountAdd, connection);
+                            command.ExecuteNonQuery();
 
                             Console.WriteLine($"Success! Your account with a number {account.AccountNumber} has been created.\n");
                             validNumber = true;
                         }
                     }
-                    // If no existing account was found, create a new account...
                 }
                 // If user enters an int that is shorter than 2 or longer than 6 characters...
                 else
@@ -67,19 +68,15 @@ class Bank
             }
 
             // If user enters value other than int...
-            catch (Exception)
+            catch (Exception ex)
             {
-                Console.WriteLine("You entered invalid type of value. Try again...\n");
+                Console.WriteLine(ex.Message);
                 validNumber = false;
                 break;
             }
         }
     }
-
-
-
-
-
+    
     public void Deposit()
     {
         CheckBankAccount(out var account);
@@ -169,8 +166,7 @@ class Bank
                 {
                     Console.WriteLine("Enter your account's number...");
                     int userInput = Convert.ToInt32(Console.ReadLine());
-
-                    account = _accounts.FirstOrDefault(a => a.AccountNumber == userInput);
+                    
 
 
                     // If there is no matching bank account's number...
