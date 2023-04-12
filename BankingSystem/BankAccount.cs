@@ -10,7 +10,7 @@ class BankAccount
     public Bank bank = new();
     
         public void Deposit() {
-        bank.CheckBankAccount(out var account, out var validateBankAccount);
+            bank.CheckBankAccount(out var accountNumber, out bool validateBankAccount, out BankAccount? account);
 
         bool validNumber = false;
 
@@ -37,7 +37,7 @@ class BankAccount
 
     public void Withdraw()
     {
-        bank.CheckBankAccount(out var account, out var validateBankAccount);
+        bank.CheckBankAccount(out var accountNumber, out bool validateBankAccount, out BankAccount? account);
 
         bool validNumber = false;
 
@@ -82,8 +82,7 @@ class BankAccount
     {
         
         // ERROR
-        BankAccount account = null;
-        bank.CheckBankAccount(out var account, out var validateBankAccount);
+        bank.CheckBankAccount(out var accountNumber, out bool validateBankAccount, out BankAccount? account);
         try
         {
             if (validateBankAccount)
@@ -92,7 +91,10 @@ class BankAccount
                 {
                     connection.Open();
 
-                    var queryCheckBalance = $"SELECT balance FROM finanse.bankSystem WHERE accountNumber = {account}";
+                    // Do debugowania:
+                    Console.WriteLine($"Podany numer konta to: {accountNumber}");
+                    
+                    var queryCheckBalance = $"SELECT balance FROM finanse.bankSystem WHERE accountNumber = {accountNumber}";
                     var command = new SqlCommand(queryCheckBalance, connection);
 
                     using (var reader = command.ExecuteReader())
@@ -100,6 +102,8 @@ class BankAccount
                     
                         while (reader.Read())
                         {
+                            // tutaj pewnie jakis błąd odnośnie 
+                            //  "Object reference not set to an instance of an object"
                             decimal balance = reader.GetDecimal(0);
                             var decimall = new BankAccount { Balance = balance };
                         }

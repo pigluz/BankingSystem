@@ -74,12 +74,13 @@ class Bank
         }
     }
     
-    public bool CheckBankAccount(out BankAccount? account, out bool validateBankAccount)
+    public bool CheckBankAccount(out int accountNumber, out bool validateBankAccount, out BankAccount? account)
     {
         _remainingAttempts = 5;
-        account = null;
         validateBankAccount = false;
+        account = null;
 
+        int userInput = 0;
         while (validateBankAccount == false)
         {
             while (_remainingAttempts > 0)
@@ -91,7 +92,7 @@ class Bank
                     {
                         connection.Open();
                         // User enters a value...
-                        int userInput = Convert.ToInt32(Console.ReadLine());
+                        userInput = Convert.ToInt32(Console.ReadLine());
 
                         var queryIfAccountExisit = $"SELECT CASE WHEN EXISTS (SELECT * FROM finanse.bankSystem WHERE accountNumber = '{userInput}') THEN CAST (1 AS BIT) ELSE CAST (0 AS BIT) END;";
                         var command = new SqlCommand(queryIfAccountExisit, connection);
@@ -119,6 +120,7 @@ class Bank
                         {
                             Console.WriteLine("Success!");
                             validateBankAccount = true;
+                            accountNumber = userInput;
                             break;
                         }
                         connection.Close();
@@ -141,7 +143,8 @@ class Bank
                 }
             }
         }
-        
+
+        accountNumber = userInput; ;
         return true;
     }
 };
