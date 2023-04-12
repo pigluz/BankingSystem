@@ -5,6 +5,7 @@ class Bank
 {
 
     public static string connectionString = @"Server=(localdb)\BankBD;DataBase=Bank";
+    private List<BankAccount> _account = new();
     int _remainingAttempts;
     
     public void CreateAccount()
@@ -73,112 +74,11 @@ class Bank
         }
     }
     
-    public void Deposit()
-    {
-        CheckBankAccount(out var account);
-
-        bool validNumber = false;
-
-        while (validNumber == false)
-        {
-            try
-            {
-                Console.WriteLine("How much money do you want to deposit?");
-                decimal userDepositMoney = Convert.ToDecimal(Console.ReadLine());
-                account.Balance += userDepositMoney;
-                Console.WriteLine($"Deposit successful. Your new balance is: {account.Balance}\n");
-                break;
-            }
-            catch (Exception)
-            {
-                Console.WriteLine("You entered invalid type of value. Try again...\n");
-                validNumber = false;
-            }
-        }
-
-
-    }
-
-    public void Withdraw()
-    {
-        CheckBankAccount(out var account);
-
-        bool validNumber = false;
-
-        while (validNumber == false)
-        {
-            try
-            {
-                Console.WriteLine("How much money do you want to withdraw?");
-
-                while (true)
-                {
-                    validNumber = true;
-                    decimal userWithdrawMoney = Convert.ToDecimal(Console.ReadLine());
-
-                    // If user enters a value that is higher than its bank account's balance
-                    if (userWithdrawMoney > account.Balance)
-                    {
-                        Console.WriteLine(
-                            $"You entered a value that is higher than balance.\nYour balance is: {account.Balance}\nPlease enter a lower value.\n");
-                    }
-
-                    else
-                    {
-                        account.Balance -= userWithdrawMoney;
-                        Console.WriteLine($"Success! Your new balance is now {account.Balance}\n");
-                        break;
-                    }
-                }
-            }
-            catch (Exception)
-            {
-                Console.WriteLine("You entered invalid type of value. Try again...\n");
-                validNumber = false;
-            }
-        }
-    }
-
-    public void CheckBalance()
-    {
-        CheckBankAccount(out var account);
-        try
-        {
-            Console.WriteLine("Enter your account number to check balance!");
-            using (var connection = new SqlConnection(connectionString))
-            {
-                connection.Open();
-                // Zrobic tak, aby pobieralo userInput z metody "CheckBankAccount" i na tej podstawie sprawdzać saldo.
-                int userInput = Convert.ToInt32(Console.ReadLine());
-
-                var queryCheckBalance = $"SELECT balance FROM finanse.bankSystem WHERE accountNumber = {userInput}";
-                var command = new SqlCommand(queryCheckBalance, connection);
-
-                using (var reader = command.ExecuteReader())
-                {
-                    
-                    while (reader.Read())
-                    {
-                        decimal balance = reader.GetDecimal(0);
-                        var decimall = new BankAccount { Balance = balance };
-                    }
-                    
-                }
-                Console.WriteLine($"Your balance is: {account.Balance}\n");
-                connection.Close();
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.Message);
-        }
-    }
-
-    public void CheckBankAccount(out BankAccount? account)
+    public bool CheckBankAccount(out BankAccount? account, out bool validateBankAccount)
     {
         _remainingAttempts = 5;
         account = null;
-        bool validateBankAccount = false;
+        validateBankAccount = false;
 
         while (validateBankAccount == false)
         {
@@ -192,7 +92,7 @@ class Bank
                         connection.Open();
                         // User enters a value...
                         int userInput = Convert.ToInt32(Console.ReadLine());
-                        
+
                         var queryIfAccountExisit = $"SELECT CASE WHEN EXISTS (SELECT * FROM finanse.bankSystem WHERE accountNumber = '{userInput}') THEN CAST (1 AS BIT) ELSE CAST (0 AS BIT) END;";
                         var command = new SqlCommand(queryIfAccountExisit, connection);
                         bool ifAccountExisitResult = (bool)command.ExecuteScalar();
@@ -241,5 +141,7 @@ class Bank
                 }
             }
         }
+        
+        return true;
     }
 };

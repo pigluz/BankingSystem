@@ -8,6 +8,7 @@ public class Program
     private static void Main(string[] args)
     {
         var bank = new Bank();
+        var bankAcc = new BankAccount();
         var exit = false;
 
         while (!exit)
@@ -31,15 +32,15 @@ public class Program
                             break;
 
                         case 2:
-                            bank.Deposit();
+                            bankAcc.Deposit();
                             break;
 
                         case 3:
-                            bank.Withdraw();
+                            bankAcc.Withdraw();
                             break;
 
                         case 4:
-                            bank.CheckBalance();
+                            bankAcc.CheckBalance();
                             break;
 
                         case 5:
