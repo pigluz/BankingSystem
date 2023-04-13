@@ -2,16 +2,12 @@
 
 namespace BankingSystem;
 
-public class Program
+class Program
 {
-
     private static void Main(string[] args)
     {
-        var bank = new Bank();
-        var bankAcc = new BankAccount(); ;
-        
             Console.WriteLine("Łączenie z bazą danych...");
-            using (var connection = new SqlConnection(Bank.connectionString))
+            using (var connection = new SqlConnection(BankAccount.ConnectionString))
             {
                 connection.Open();
                 Console.WriteLine("Połączono.\n");
@@ -21,23 +17,26 @@ public class Program
                 {
                     Console.WriteLine("\nMenu:\n1.Create Account\n2.Deposit\n3.Withdraw\n4.Check Balance\n5.Exit\n");
                     var userMenuInput = Convert.ToInt32(Console.ReadLine());
-
+                    Console.WriteLine("Type your account number...");
+                    var number = Convert.ToInt32(Console.ReadLine());
+                    var accountNr = BankAccount.GetAccount(number);
+                    
                     switch (userMenuInput)
                     {
                         case 1:
-                            bank.CreateAccount();
+                            accountNr.CreateAccount();
                             break;
 
                         case 2:
-                            bankAcc.Deposit();
+                            accountNr.Deposit();
                             break;
 
                         case 3:
-                            bankAcc.Withdraw();
+                            accountNr.Withdraw();
                             break;
 
                         case 4:
-                            bankAcc.CheckBalance();
+                             var balance = accountNr.CheckBalance(accountNr.AccountNumber);
                             break;
 
                         case 5:
