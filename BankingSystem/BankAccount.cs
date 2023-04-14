@@ -11,23 +11,37 @@ class BankAccount
     
     public static BankAccount GetAccount(int accountNumber)
     {
-        BankAccount bankAccount = new(); 
-         
-        var queryIfAccountExisit = $"SELECT * FROM finanse.bankSystem WHERE accountNumber = {accountNumber}";
+        BankAccount bankAccount = new BankAccount();
+
         using (var connection = new SqlConnection(ConnectionString))
         {
             connection.Open();
+            var queryIfAccountExisit =
+                $"SELECT CASE WHEN EXISTS (SELECT * FROM finanse.bankSystem WHERE accountNumber = '{accountNumber}') THEN CAST (1 AS BIT) ELSE CAST (0 AS BIT) END;";
             var command = new SqlCommand(queryIfAccountExisit, connection);
-            var reader = command.ExecuteReader();
+            bool ifAccountExisitResult = (bool)command.ExecuteScalar();
 
-            while (reader.Read())
+            if (ifAccountExisitResult)
             {
-                bankAccount.AccountNumber = (int)reader["AccountNumber"];
-                bankAccount.Balance = (decimal)reader["Balance"];
+                var querySelect = $"SELECT * FROM finanse.bankSystem WHERE accountNumber = {accountNumber}";
+
+                command = new SqlCommand(querySelect, connection);
+                var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    bankAccount.AccountNumber = (int)reader["AccountNumber"];
+                    bankAccount.Balance = (decimal)reader["Balance"];
+                }
+
+                connection.Close();
+                return bankAccount;
             }
-            connection.Close();
+
+            // ?????????????????????????????????????????????????????????????????
+            new BankAccount() = accountNumber;
+
         }
-        
         return bankAccount;
     }
     
