@@ -6,27 +6,27 @@ class Program
 {
     private static void Main(string[] args)
     {
-            Console.WriteLine("Łączenie z bazą danych...");
+            Console.WriteLine("Connecting to the database....");
             using (var connection = new SqlConnection(BankAccount.ConnectionString))
             {
                 connection.Open();
-                Console.WriteLine("Połączono.\n");
+                Console.WriteLine("Connected.\n");
 
                 Console.WriteLine("Welcome to Test Bank!");
                 while (true)
                 {
                     Console.WriteLine("\nMenu:\n1.Create Account\n2.Deposit\n3.Withdraw\n4.Check Balance\n5.Exit\n");
                     var userMenuInput = Convert.ToInt32(Console.ReadLine());
-                    Console.WriteLine("Type your account number...");
+                    Console.WriteLine("Type your account number... (2-6 characters long)");
                     var number = Convert.ToInt32(Console.ReadLine());
                     var accountNr = BankAccount.GetAccount(number);
-                    
+
                     switch (userMenuInput)
                     {
                         case 1:
                             accountNr.CreateAccount();
                             break;
-
+                            
                         case 2:
                             accountNr.Deposit();
                             break;
@@ -36,7 +36,7 @@ class Program
                             break;
 
                         case 4:
-                             var balance = accountNr.CheckBalance(accountNr.AccountNumber);
+                             var balance = accountNr.CheckBalance();
                             break;
 
                         case 5:

@@ -11,7 +11,6 @@ class BankAccount
     
      public void CreateAccount()
     {
-        Console.WriteLine("Enter a new account number... (2-6 characters long)");
         while (true)
         {
             try
@@ -19,19 +18,15 @@ class BankAccount
                 using (var connection = new SqlConnection(ConnectionString))
                 {
                     connection.Open();
-                    // User enters a value...
-                    int accountNumber = Convert.ToInt32(Console.ReadLine());
-
+                    
                     // If user enters int correctly...
-                    if (!(accountNumber < 10 || accountNumber > 100000))
+                    if (!(AccountNumber < 10 || AccountNumber > 100000))
                     {
                         var queryIfAccountExisit =
-                            $"SELECT CASE WHEN EXISTS (SELECT * FROM finanse.bankSystem WHERE accountNumber = '{accountNumber}') THEN CAST (1 AS BIT) ELSE CAST (0 AS BIT) END;";
+                            $"SELECT CASE WHEN EXISTS (SELECT * FROM finanse.bankSystem WHERE accountNumber = '{AccountNumber}') THEN CAST (1 AS BIT) ELSE CAST (0 AS BIT) END;";
                         var command = new SqlCommand(queryIfAccountExisit, connection);
-
                         bool ifAccountExisitResult = (bool)command.ExecuteScalar();
-
-
+                        
                         // Check if an account with this number already exists...
                         if (ifAccountExisitResult)
                         {
@@ -40,16 +35,14 @@ class BankAccount
                         // If no existing account was found, create a new account...
                         else
                         {
-                            BankAccount account = new();
-                            account.AccountNumber = accountNumber;
-
+                            
                             var queryAccountAdd =
-                                $"INSERT INTO finanse.bankSystem (accountNumber) VALUES ({account.AccountNumber})";
+                                $"INSERT INTO finanse.bankSystem (accountNumber) VALUES ({AccountNumber})";
                             command = new SqlCommand(queryAccountAdd, connection);
                             command.ExecuteNonQuery();
 
                             Console.WriteLine(
-                                $"Success! Your account with a number {account.AccountNumber} has been created.\n");
+                                $"Success! Your account with a number {AccountNumber} has been created.\n");
                             break;
                         }
                     }
@@ -66,8 +59,9 @@ class BankAccount
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                break;
             }
+
+            break;
         }
     }
 
@@ -88,7 +82,6 @@ class BankAccount
                  bankAccount.Balance = (decimal)reader["balance"];
              }
              connection.Close();
-             Console.WriteLine($"{bankAccount.AccountNumber}, {bankAccount.Balance}");
          }
 
          return bankAccount;
@@ -96,98 +89,111 @@ class BankAccount
      
         public void Deposit()
         {
-            BankAccount bankAccount = new BankAccount();
             while (true)
             {
                 try
                 {
                     Console.WriteLine("How much money do you want to deposit?");
                     decimal userDepositMoney = Convert.ToDecimal(Console.ReadLine());
-                    var depositResult = bankAccount.Balance += userDepositMoney;
-                    Console.WriteLine($"Deposit successful. Your new balance is: {bankAccount.Balance}\n");
-                    
-                        // FINISH THIS FUNCTION
+                    var depositResult = Balance += userDepositMoney;
+                    Console.WriteLine($"Deposit successful. Your new balance is: {Balance}\n");
+
+                    if (userDepositMoney <= 0)
+                    {
+                        Console.WriteLine("Cannot deposit less than 0. Please try again");
+                        break;
+                    }
+
+                    var queryDeposit =
+                        $"UPDATE finanse.bankSystem SET balance = {depositResult} WHERE accountNumber = {AccountNumber}";
+
+                    using (var connection = new SqlConnection(ConnectionString))
+                    {
+                        connection.Open();
+                        var command = new SqlCommand(queryDeposit, connection);
+                        command.ExecuteNonQuery();
+                    }
+                    Console.WriteLine($"Success! Your new balance is now {Balance}\n");
                     break;
+
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    Console.WriteLine("You entered invalid type of value. Try again...\n");
+                    Console.WriteLine(ex.Message + "\n");
                 }
             }
         }
         
     public void Withdraw()
     {
-        BankAccount bankAccount = new();
         while (true)
         {
             try
             {
                 Console.WriteLine("How much money do you want to withdraw?");
-                while (true)
-                {
-                    decimal userWithdrawMoney = Convert.ToDecimal(Console.ReadLine());
+                decimal userWithdrawMoney = Convert.ToDecimal(Console.ReadLine());
 
                     // If user enters a value that is higher than its bank account's balance
-                    if (userWithdrawMoney > bankAccount.Balance)
+                    if (userWithdrawMoney > Balance)
                     {
                         Console.WriteLine(
-                            $"You entered a value that is higher than balance.\nYour balance is: {bankAccount.Balance}\nPlease enter a lower value.\n");
+                            $"You entered a value that is higher than balance.\nYour balance is: {Balance}\nPlease enter a lower value.\n");
                     }
 
                     else
                     {
-                        var withdrawResult = bankAccount.Balance -= userWithdrawMoney;
-                        Console.WriteLine($"Success! Your new balance is now {bankAccount.Balance}\n");
-                        
-                        // FINISH THIS FUNCTION
+                        var withdrawResult = Balance -= userWithdrawMoney;
+                        var queryWithdraw =
+                            $"UPDATE finanse.bankSystem SET balance = {withdrawResult} WHERE accountNumber = {AccountNumber}";
+
+                        using (var connection = new SqlConnection(ConnectionString))
+                        {
+                            connection.Open();
+                            var command = new SqlCommand(queryWithdraw, connection);
+                            command.ExecuteNonQuery();
+                        }
+                        Console.WriteLine($"Success! Your new balance is now {Balance}\n");
                         break;
-                    }
+                    
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                Console.WriteLine("You entered invalid type of value. Try again...\n");
+                Console.WriteLine(ex.Message + "\n");
             }
         }
     }
 
-    public decimal CheckBalance(int accountNumber)
+    public decimal CheckBalance()
     {
-        BankAccount bankAccount = GetAccount(accountNumber);
         try
         {
+            using (var connection = new SqlConnection(ConnectionString))
+            {
+                connection.Open();
+                var queryCheckBalance = $"SELECT balance FROM finanse.bankSystem WHERE accountNumber = {AccountNumber}";
+                var command = new SqlCommand(queryCheckBalance, connection);
 
-                using (var connection = new SqlConnection(ConnectionString))
+                using (var reader = command.ExecuteReader())
                 {
-                    connection.Open();
-
-                    // Do debugowania:
-                    Console.WriteLine($"Inputted number: {bankAccount.AccountNumber}");
                     
-                    var queryCheckBalance = $"SELECT balance FROM finanse.bankSystem WHERE accountNumber = {bankAccount.AccountNumber}";
-                    var command = new SqlCommand(queryCheckBalance, connection);
-
-                    using (var reader = command.ExecuteReader())
+                    while (reader.Read())
                     {
-                    
-                        while (reader.Read())
-                        {
-                            bankAccount.Balance = (decimal)reader["Balance"];
-                        }
-                    
+                        Balance = (decimal)reader["Balance"];
                     }
                     
-                    Console.WriteLine($"Your balance is: {bankAccount.Balance}\n");
-                    connection.Close();
                 }
+                    
+                Console.WriteLine($"Your balance is: {Balance}\n");
+                connection.Close();
+            }
         } 
         
         catch (Exception ex) { 
-            Console.WriteLine(ex.Message);
+            Console.WriteLine(ex.Message + "\n");
         }
 
-        return bankAccount.Balance;
+        return Balance;
     } 
 
 }
