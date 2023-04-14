@@ -9,21 +9,43 @@ class BankAccount
     public decimal Balance { get; set; }
     
     
-     public void CreateAccount()
+    public static BankAccount GetAccount(int accountNumber)
     {
-        while (true)
+        BankAccount bankAccount = new();
+         
+        var queryIfAccountExisit = $"SELECT * FROM finanse.bankSystem WHERE accountNumber = {accountNumber}";
+        using (var connection = new SqlConnection(ConnectionString))
         {
-            try
+            connection.Open();
+            var command = new SqlCommand(queryIfAccountExisit, connection);
+            var reader = command.ExecuteReader();
+
+            while (reader.Read())
+            {
+                bankAccount.AccountNumber = (int)reader["AccountNumber"];
+                bankAccount.Balance = (decimal)reader["Balance"];
+            }
+            connection.Close();
+        }
+        
+        return bankAccount;
+    }
+    
+    
+     public void CreateAccount(int accNumber)
+     {
+         while (true) {
+             try
             {
                 using (var connection = new SqlConnection(ConnectionString))
                 {
-                    connection.Open();
-                    
                     // If user enters int correctly...
-                    if (!(AccountNumber < 10 || AccountNumber > 100000))
+                    if (!(accNumber <= 10 || accNumber >= 100000))
                     {
+                        connection.Open();
+                        
                         var queryIfAccountExisit =
-                            $"SELECT CASE WHEN EXISTS (SELECT * FROM finanse.bankSystem WHERE accountNumber = '{AccountNumber}') THEN CAST (1 AS BIT) ELSE CAST (0 AS BIT) END;";
+                            $"SELECT CASE WHEN EXISTS (SELECT * FROM finanse.bankSystem WHERE accountNumber = '{accNumber}') THEN CAST (1 AS BIT) ELSE CAST (0 AS BIT) END;";
                         var command = new SqlCommand(queryIfAccountExisit, connection);
                         bool ifAccountExisitResult = (bool)command.ExecuteScalar();
                         
@@ -37,12 +59,12 @@ class BankAccount
                         {
                             
                             var queryAccountAdd =
-                                $"INSERT INTO finanse.bankSystem (accountNumber) VALUES ({AccountNumber})";
+                                $"INSERT INTO finanse.bankSystem (accountNumber) VALUES ({accNumber})";
                             command = new SqlCommand(queryAccountAdd, connection);
                             command.ExecuteNonQuery();
 
                             Console.WriteLine(
-                                $"Success! Your account with a number {AccountNumber} has been created.\n");
+                                $"Success! Your account with a number {accNumber} has been created.\n");
                             break;
                         }
                     }
@@ -64,28 +86,6 @@ class BankAccount
             break;
         }
     }
-
-    
-     public static BankAccount GetAccount(int accountNumber)
-     {
-         var queryIfAccountExisit = $"SELECT * FROM finanse.bankSystem WHERE accountNumber = {accountNumber}";
-         BankAccount bankAccount = new();
-         using (var connection = new SqlConnection(ConnectionString))
-         {
-             connection.Open();
-             var command = new SqlCommand(queryIfAccountExisit, connection);
-             var reader = command.ExecuteReader();
-
-             while (reader.Read())
-             {
-                 bankAccount.AccountNumber = (int)reader["accountNumber"];
-                 bankAccount.Balance = (decimal)reader["balance"];
-             }
-             connection.Close();
-         }
-
-         return bankAccount;
-     }
      
         public void Deposit()
         {

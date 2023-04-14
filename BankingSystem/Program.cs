@@ -24,7 +24,7 @@ class Program
                     switch (userMenuInput)
                     {
                         case 1:
-                            accountNr.CreateAccount();
+                            accountNr.CreateAccount(number);
                             break;
                             
                         case 2:
