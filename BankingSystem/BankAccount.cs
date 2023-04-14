@@ -11,7 +11,7 @@ class BankAccount
     
     public static BankAccount GetAccount(int accountNumber)
     {
-        BankAccount bankAccount = new();
+        BankAccount bankAccount = new(); 
          
         var queryIfAccountExisit = $"SELECT * FROM finanse.bankSystem WHERE accountNumber = {accountNumber}";
         using (var connection = new SqlConnection(ConnectionString))

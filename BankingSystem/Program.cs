@@ -21,7 +21,7 @@ class Program
                     var number = Convert.ToInt32(Console.ReadLine());
                     var accountNr = BankAccount.GetAccount(number);
 
-                    switch (userMenuInput)
+                    switch (userMenuInput) 
                     {
                         case 1:
                             accountNr.CreateAccount(number);
