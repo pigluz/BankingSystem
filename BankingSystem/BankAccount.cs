@@ -38,11 +38,9 @@ class BankAccount
                 return bankAccount;
             }
 
-            // ?????????????????????????????????????????????????????????????????
-            new BankAccount() = accountNumber;
 
         }
-        return bankAccount;
+        return null;
     }
     
     
@@ -94,7 +92,7 @@ class BankAccount
             // Error message
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine($"ERROR: {ex.Message}\n");
             }
 
             break;
@@ -133,7 +131,7 @@ class BankAccount
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine(ex.Message + "\n");
+                    Console.WriteLine($"ERROR: {ex.Message}\n");
                 }
             }
         }
@@ -151,7 +149,7 @@ class BankAccount
                     if (userWithdrawMoney > Balance)
                     {
                         Console.WriteLine(
-                            $"You entered a value that is higher than balance.\nYour balance is: {Balance}\nPlease enter a lower value.\n");
+                            $"\nYou entered a value that is higher than balance.\nYour balance is: {Balance}\n\nPlease enter a lower value.\n");
                     }
 
                     else
@@ -173,7 +171,7 @@ class BankAccount
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message + "\n");
+                Console.WriteLine($"ERROR: {ex.Message}\n");
             }
         }
     }
@@ -204,7 +202,7 @@ class BankAccount
         } 
         
         catch (Exception ex) { 
-            Console.WriteLine(ex.Message + "\n");
+            Console.WriteLine($"ERROR: {ex.Message}\n");
         }
 
         return Balance;
