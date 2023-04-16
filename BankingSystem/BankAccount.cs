@@ -1,14 +1,18 @@
 ﻿using System.Data.SqlClient;
+using System.Data.SqlTypes;
 
 namespace BankingSystem;
 
 class BankAccount
 {
     public static string ConnectionString = @"Server=(localdb)\BankBD;DataBase=Bank";
+    public int PersonID { get; set; }
     public int AccountNumber { get; set; }
     public decimal Balance { get; set; }
-    
-    
+    public decimal UserDepositMoney { get; set; }
+    public decimal UserWithdrawMoney { get; set; }
+
+
     public static BankAccount GetAccount(int accountNumber)
     {
         BankAccount bankAccount = new BankAccount();
@@ -30,6 +34,7 @@ class BankAccount
 
                 while (reader.Read())
                 {
+                    bankAccount.PersonID = (int)reader["PersonID"];
                     bankAccount.AccountNumber = (int)reader["AccountNumber"];
                     bankAccount.Balance = (decimal)reader["Balance"];
                 }
@@ -37,12 +42,10 @@ class BankAccount
                 connection.Close();
                 return bankAccount;
             }
-
-
+            
         }
         return null;
     }
-    
     
      public void CreateAccount(int accNumber)
      {
@@ -57,7 +60,7 @@ class BankAccount
                         connection.Open();
                         
                         var queryIfAccountExisit =
-                            $"SELECT CASE WHEN EXISTS (SELECT * FROM finanse.bankSystem WHERE accountNumber = '{accNumber}') THEN CAST (1 AS BIT) ELSE CAST (0 AS BIT) END;";
+                            $"SELECT CASE WHEN EXISTS (SELECT * FROM finanse.bankSystem WHERE AccountNumber = '{accNumber}') THEN CAST (1 AS BIT) ELSE CAST (0 AS BIT) END;";
                         var command = new SqlCommand(queryIfAccountExisit, connection);
                         bool ifAccountExisitResult = (bool)command.ExecuteScalar();
                         
@@ -77,6 +80,7 @@ class BankAccount
 
                             Console.WriteLine(
                                 $"Success! Your account with a number {accNumber} has been created.\n");
+
                             break;
                         }
                     }
@@ -99,51 +103,73 @@ class BankAccount
         }
     }
      
-        public void Deposit()
-        {
-            while (true)
-            {
-                try
-                {
-                    Console.WriteLine("How much money do you want to deposit?");
-                    decimal userDepositMoney = Convert.ToDecimal(Console.ReadLine());
-                    var depositResult = Balance += userDepositMoney;
-                    Console.WriteLine($"Deposit successful. Your new balance is: {Balance}\n");
+     public void Deposit()
+     {
+         decimal userDepositMoney = 0;
+         HistoryInfo dateInfo = new HistoryInfo();
+         BankAccount depositInfo = new BankAccount();
 
-                    if (userDepositMoney <= 0)
-                    {
-                        Console.WriteLine("Cannot deposit less than 0. Please try again");
-                        break;
-                    }
+         while (true)
+         {
+             try
+             {
+                 Console.WriteLine("How much money do you want to deposit?");
+                 userDepositMoney = Convert.ToDecimal(Console.ReadLine());
+                 var depositResult = Balance += userDepositMoney;
 
-                    var queryDeposit =
-                        $"UPDATE finanse.bankSystem SET balance = {depositResult} WHERE accountNumber = {AccountNumber}";
+                 if (userDepositMoney <= 0)
+                 {
+                     Console.WriteLine("Cannot deposit less than 0. Please try again");
+                     break;
+                 }
 
-                    using (var connection = new SqlConnection(ConnectionString))
-                    {
-                        connection.Open();
-                        var command = new SqlCommand(queryDeposit, connection);
-                        command.ExecuteNonQuery();
-                    }
-                    Console.WriteLine($"Success! Your new balance is now {Balance}\n");
-                    break;
+                 var queryDeposit =
+                     $"UPDATE finanse.bankSystem SET balance = {depositResult} WHERE accountNumber = {AccountNumber}";
 
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"ERROR: {ex.Message}\n");
-                }
-            }
-        }
+                 using (var connection = new SqlConnection(ConnectionString))
+                 {
+                     connection.Open();
+                     
+                     var command = new SqlCommand(queryDeposit, connection);
+                     command.ExecuteNonQuery();
+                     
+                     Console.WriteLine($"Success! Your new balance is now {depositResult}\n");
+                     depositInfo.UserDepositMoney = userDepositMoney;
+
+                     var time = DateTime.Now;
+                     dateInfo.Date = time.ToString("yyyy-MM-dd HH:mm:ss");
+
+                     var queryDepositInfo =
+                         $"INSERT INTO finanse.accountExpenses ([Withdraw/Deposit], BalanceAfter, PersonID, Date) VALUES (+{depositInfo.UserDepositMoney}, {depositResult}, {AccountNumber}, '{DateTime.Now:yyyy-MM-dd HH:mm:ss}')";
+                     command = new SqlCommand(queryDepositInfo, connection);
+                     command.ExecuteNonQuery();
+                     
+                     connection.Close();
+                 }
+
+                 break;
+
+             }
+             catch (Exception ex)
+             {
+                 Console.WriteLine($"ERROR: {ex.Message}\n");
+             }
+         }
+     }
+
         
     public void Withdraw()
     {
+        decimal userWithdrawMoney = 0;
+        HistoryInfo dateInfo = new HistoryInfo();
+        BankAccount withdrawInfo = new BankAccount();
+        
         while (true)
         {
             try
             {
                 Console.WriteLine("How much money do you want to withdraw?");
-                decimal userWithdrawMoney = Convert.ToDecimal(Console.ReadLine());
+                userWithdrawMoney = Convert.ToDecimal(Console.ReadLine());
 
                     // If user enters a value that is higher than its bank account's balance
                     if (userWithdrawMoney > Balance)
@@ -156,18 +182,30 @@ class BankAccount
                     {
                         var withdrawResult = Balance -= userWithdrawMoney;
                         var queryWithdraw =
-                            $"UPDATE finanse.bankSystem SET balance = {withdrawResult} WHERE accountNumber = {AccountNumber}";
+                            $"UPDATE finanse.bankSystem SET Balance = {withdrawResult} WHERE accountNumber = {AccountNumber}";
 
                         using (var connection = new SqlConnection(ConnectionString))
                         {
                             connection.Open();
                             var command = new SqlCommand(queryWithdraw, connection);
                             command.ExecuteNonQuery();
+                            
+                            Console.WriteLine($"Success! Your new balance is now {Balance}\n");
+                            withdrawInfo.UserWithdrawMoney = userWithdrawMoney;
+                            
+                            var time = DateTime.Now;
+                            dateInfo.Date = time.ToString("yyyy-MM-dd HH:mm:ss");
+                        
+                            var queryWithdrawInfo =
+                                $"INSERT INTO finanse.accountExpenses ([Withdraw/Deposit], BalanceAfter, PersonID, Date) VALUES (-{withdrawInfo.UserDepositMoney}, {withdrawInfo}, {AccountNumber}, '{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}')";
+                            command = new SqlCommand(queryWithdrawInfo, connection);
+                            command.ExecuteNonQuery();
+                     
+                            connection.Close();
                         }
-                        Console.WriteLine($"Success! Your new balance is now {Balance}\n");
+                        
                         break;
-                    
-                }
+                    }
             }
             catch (Exception ex)
             {
@@ -206,6 +244,63 @@ class BankAccount
         }
 
         return Balance;
-    } 
+    }
+
+    public void CheckHistory()
+    {
+        List<HistoryInfo> _historyInfos = null;
+        
+        // 1. Uzytkownik wpisuje numer w menu.
+        // 2. Baza danych robi SELECT w accountExpenses.
+
+        using (var connection = new SqlConnection(ConnectionString))
+        {
+            connection.Open();
+            var querySelect = $"SELECT * FROM finanse.accountExpenses WHERE PersonID = {PersonID}";
+            var command = new SqlCommand(querySelect, connection);
+            
+            using (var reader = command.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    var id = (int)reader["ExpensesID"];
+                    var operation = (decimal)reader["Withdraw/Deposit"];
+                    var balanceafter = (decimal)reader["BalanceAfter"];
+                    var date = reader.GetDateTime(4).ToString("g");
+
+                    var history = new HistoryInfo
+                        { ID = id, Operations = operation, BalanceAfter = balanceafter, Date = date };
+                    _historyInfos.Add(history);
+                }
+            }
+            connection.Close();
+        } 
+        
+        Console.WriteLine(($"BALANCE HISTORY FOR _{AccountNumber}_:\n" +
+                           $"    |  Operations   |  Balance After  |  Date  "));
+
+        if (_historyInfos != null)
+        {
+            // 3. Zwraca wynik ostatnich operacji, w kolejnosci od najświeższej za pomocą FOREACH. 
+            foreach (var item in _historyInfos)
+            {
+                Console.WriteLine($"{item.ID}  | {item.Operations}  |  {item.BalanceAfter}  |   {item.Date}  ");
+                break;
+            }
+        }
+        else
+        {
+            Console.WriteLine("There is no history!");
+        }
+        
+        
+        // Taki wzór:
+        // History for {accountNumber}:
+        //  Number  |  Operation |  Balance After   |  Date
+        
+        //    1.   |   -{value}  | {balance after} | {date}   
+        //    2.   |  +{value}  | {balance after} | {date}
+    }   
+    
 
 }

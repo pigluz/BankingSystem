@@ -15,7 +15,7 @@ class Program
                 Console.WriteLine("Welcome to Test Bank!");
                 while (true)
                 {
-                    Console.WriteLine("\nMenu:\n1.Create Account\n2.Deposit\n3.Withdraw\n4.Check Balance\n5.Exit\n");
+                    Console.WriteLine("\nMenu:\n1.Create Account\n2.Deposit\n3.Withdraw\n4.Check Balance\n5.Check history\n6.Exit\n");
 
                     try
                     {
@@ -46,10 +46,14 @@ class Program
                                 break;
 
                             case 5:
+                                var accountCase5 = BankAccount.GetAccount(number);
+                                accountCase5.CheckHistory();
+                                break;
+                            case 6:
                                 Console.WriteLine("\nExiting Program");
                                 Environment.Exit(0);
                                 break;
-
+                            
                             default:
                                 Console.WriteLine("\nWrong value.\nExiting Program");
                                 Environment.Exit(0);
