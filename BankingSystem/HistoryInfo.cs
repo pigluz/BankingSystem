@@ -8,5 +8,4 @@ public class HistoryInfo
     
     public string Date { get; set; }
     
-    public static List<HistoryInfo> HistoryInfos_ = null;
 }

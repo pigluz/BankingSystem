@@ -15,7 +15,7 @@ class Program
                 Console.WriteLine("Welcome to Test Bank!");
                 while (true)
                 {
-                    Console.WriteLine("\nMenu:\n1.Create Account\n2.Deposit\n3.Withdraw\n4.Check Balance\n5.Check history\n6.Exit\n");
+                    Console.WriteLine("\nMenu:\n1.Create Account\n2.Deposit\n3.Withdraw\n4.Check Balance\n5.Check History\n6.Exit\n");
 
                     try
                     {

@@ -5,6 +5,7 @@ namespace BankingSystem;
 
 class BankAccount
 {
+    public static List<HistoryInfo> historyInfo = new();
     public static string ConnectionString = @"Server=(localdb)\BankBD;DataBase=Bank";
     public int PersonId { get; set; }
     public int AccountNumber { get; set; }
@@ -251,8 +252,6 @@ class BankAccount
 
     public void CheckHistory()
     {
-        List<HistoryInfo> HistoryInfos_ = new List<HistoryInfo>();
-
         // 1. Uzytkownik wpisuje numer w menu.
         // 2. Baza danych robi SELECT w accountExpenses.
 
@@ -265,16 +264,18 @@ class BankAccount
             using (var reader = command.ExecuteReader())
             {
                 while (reader.Read())
-                {
-                    var id = (int)reader["ExpensesID"];
-                    var operation = (decimal)reader["Withdraw/Deposit"];
-                    var balanceafter = (decimal)reader["BalanceAfter"];
-                    var date = reader.GetDateTime(4).ToString("g");
+                    {
+                        var id = (int)reader["ExpensesID"];
+                        var operation = (decimal)reader["Withdraw/Deposit"];
+                        var balanceafter = (decimal)reader["BalanceAfter"];
+                        var date = reader.GetDateTime(4).ToString("g");
 
-                    var history = new HistoryInfo
-                    { Id = id, Operations = operation, BalanceAfter = balanceafter, Date = date };
-                    HistoryInfos_.Add(history);
-                }
+                        var history = new HistoryInfo
+                            { Id = id, Operations = operation, BalanceAfter = balanceafter, Date = date };
+                        historyInfo.Add(history);
+                    }
+                    
+                
             }
             connection.Close();
         }
@@ -282,27 +283,25 @@ class BankAccount
         Console.WriteLine(($"BALANCE HISTORY FOR ACCOUNT: {AccountNumber}:\n" +
                            $"    |  Operations   |  Balance After  |       Date  "));
 
-        if (HistoryInfos_ != null)
+        if (historyInfo != null)
         {
             // 3. Zwraca wynik ostatnich operacji, w kolejnosci od najświeższej za pomocą FOREACH. 
-            foreach (var item in HistoryInfos_)
+            foreach (var item in historyInfo)
             {
                 Console.WriteLine($" {item.Id}  |       {item.Operations}      |      {item.BalanceAfter}       |   {item.Date}  ");
-                break;
             }
         }
         else
         {
             Console.WriteLine("There is no history!");
         }
-
-
+        
         // Taki wzór:
         // History for {accountNumber}:
         //  Number  |  Operation |  Balance After   |  Date
 
-        //    1.   |   -{value}  | {balance after} | {date}   
-        //    2.   |  +{value}  | {balance after} | {date}
+        //    1.    |   {value}  | {balance after}  | {date}   
+        //    2.    |   {value}  | {balance after}  | {date}
     }
 
 
