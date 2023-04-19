@@ -6,7 +6,7 @@ namespace BankingSystem;
 class BankAccount
 {
     public static string ConnectionString = @"Server=(localdb)\BankBD;DataBase=Bank";
-    public int PersonID { get; set; }
+    public int PersonId { get; set; }
     public int AccountNumber { get; set; }
     public decimal Balance { get; set; }
     public decimal UserDepositMoney { get; set; }
@@ -34,7 +34,7 @@ class BankAccount
 
                 while (reader.Read())
                 {
-                    bankAccount.PersonID = (int)reader["PersonID"];
+                    bankAccount.PersonId = (int)reader["PersonID"];
                     bankAccount.AccountNumber = (int)reader["AccountNumber"];
                     bankAccount.Balance = (decimal)reader["Balance"];
                 }
@@ -141,7 +141,7 @@ class BankAccount
                     dateInfo.Date = time.ToString("yyyy-MM-dd HH:mm:ss");
 
                     var queryDepositInfo =
-                        $"INSERT INTO finanse.accountExpenses ([Withdraw/Deposit], BalanceAfter, PersonID, Date) VALUES (+{depositInfo.UserDepositMoney}, {depositResult}, {PersonID}, '{DateTime.Now:yyyy-MM-dd HH:mm:ss}')";
+                        $"INSERT INTO finanse.accountExpenses ([Withdraw/Deposit], BalanceAfter, PersonID, Date) VALUES ('++{depositInfo.UserDepositMoney}', {depositResult}, {PersonId}, '{DateTime.Now:yyyy-MM-dd HH:mm:ss}')";
                     command = new SqlCommand(queryDepositInfo, connection);
                     command.ExecuteNonQuery();
 
@@ -188,17 +188,18 @@ class BankAccount
                     using (var connection = new SqlConnection(ConnectionString))
                     {
                         connection.Open();
+                        
                         var command = new SqlCommand(queryWithdraw, connection);
                         command.ExecuteNonQuery();
 
-                        Console.WriteLine($"Success! Your new balance is now {Balance}\n");
+                        Console.WriteLine($"Success! Your new balance is now {withdrawResult}\n");
                         withdrawInfo.UserWithdrawMoney = userWithdrawMoney;
 
                         var time = DateTime.Now;
                         dateInfo.Date = time.ToString("yyyy-MM-dd HH:mm:ss");
 
                         var queryWithdrawInfo =
-                            $"INSERT INTO finanse.accountExpenses ([Withdraw/Deposit], BalanceAfter, PersonID, Date) VALUES (-{withdrawInfo.UserDepositMoney}, {withdrawInfo}, {AccountNumber}, '{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}')";
+                            $"INSERT INTO finanse.accountExpenses ([Withdraw/Deposit], BalanceAfter, PersonID, Date) VALUES ('-{withdrawInfo.UserWithdrawMoney}', {withdrawResult}, {PersonId}, '{DateTime.Now:yyyy-MM-dd HH:mm:ss}')";
                         command = new SqlCommand(queryWithdrawInfo, connection);
                         command.ExecuteNonQuery();
 
@@ -250,7 +251,7 @@ class BankAccount
 
     public void CheckHistory()
     {
-        List<HistoryInfo> _historyInfos = null;
+        List<HistoryInfo> HistoryInfos_ = new List<HistoryInfo>();
 
         // 1. Uzytkownik wpisuje numer w menu.
         // 2. Baza danych robi SELECT w accountExpenses.
@@ -258,7 +259,7 @@ class BankAccount
         using (var connection = new SqlConnection(ConnectionString))
         {
             connection.Open();
-            var querySelect = $"SELECT * FROM finanse.accountExpenses WHERE PersonID = {PersonID}";
+            var querySelect = $"SELECT * FROM finanse.accountExpenses WHERE PersonID = {PersonId}";
             var command = new SqlCommand(querySelect, connection);
 
             using (var reader = command.ExecuteReader())
@@ -271,22 +272,22 @@ class BankAccount
                     var date = reader.GetDateTime(4).ToString("g");
 
                     var history = new HistoryInfo
-                    { ID = id, Operations = operation, BalanceAfter = balanceafter, Date = date };
-                    _historyInfos.Add(history);
+                    { Id = id, Operations = operation, BalanceAfter = balanceafter, Date = date };
+                    HistoryInfos_.Add(history);
                 }
             }
             connection.Close();
         }
 
-        Console.WriteLine(($"BALANCE HISTORY FOR _{AccountNumber}_:\n" +
-                           $"    |  Operations   |  Balance After  |  Date  "));
+        Console.WriteLine(($"BALANCE HISTORY FOR ACCOUNT: {AccountNumber}:\n" +
+                           $"    |  Operations   |  Balance After  |       Date  "));
 
-        if (_historyInfos != null)
+        if (HistoryInfos_ != null)
         {
             // 3. Zwraca wynik ostatnich operacji, w kolejnosci od najświeższej za pomocą FOREACH. 
-            foreach (var item in _historyInfos)
+            foreach (var item in HistoryInfos_)
             {
-                Console.WriteLine($"{item.ID}  | {item.Operations}  |  {item.BalanceAfter}  |   {item.Date}  ");
+                Console.WriteLine($" {item.Id}  |       {item.Operations}      |      {item.BalanceAfter}       |   {item.Date}  ");
                 break;
             }
         }

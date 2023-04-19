@@ -2,11 +2,11 @@
 
 public class HistoryInfo
 {
-    public int ID { get; set; }
+    public int Id { get; set; }
     public decimal Operations { get; set; }
     public decimal BalanceAfter { get; set; }
     
     public string Date { get; set; }
-
-    public static List<HistoryInfo> _historyInfos = new();
+    
+    public static List<HistoryInfo> HistoryInfos_ = null;
 }
