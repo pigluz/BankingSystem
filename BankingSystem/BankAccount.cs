@@ -141,7 +141,7 @@ class BankAccount
                     dateInfo.Date = time.ToString("yyyy-MM-dd HH:mm:ss");
 
                     var queryDepositInfo =
-                        $"INSERT INTO finanse.accountExpenses ([Withdraw/Deposit], BalanceAfter, PersonID, Date) VALUES ('++{depositInfo.UserDepositMoney}', {depositResult}, {PersonId}, '{DateTime.Now:yyyy-MM-dd HH:mm:ss}')";
+                        $"INSERT INTO finanse.accountExpenses ([Withdraw/Deposit], BalanceAfter, PersonID, Date) VALUES ('{depositInfo.UserDepositMoney}', {depositResult}, {PersonId}, '{DateTime.Now:yyyy-MM-dd HH:mm:ss}')";
                     command = new SqlCommand(queryDepositInfo, connection);
                     command.ExecuteNonQuery();
 
