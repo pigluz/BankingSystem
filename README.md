@@ -6,7 +6,7 @@ C# Program that implements a simple banking system. With several methods to perf
   <li>.NET IDE</li>
   <li> SQL Server Managment Studio </li>
   <li> A working Microsoft SQL Server LocalBD named "BankBD" and with a database called "Bank"</li>
-  <li> A backup of the <a href="DB_backup.bak">tables</a></li>
+  <li> A template of the <a href="DB_backup.bak">tables</a></li>
 </ul>
 
 ## How to use?
